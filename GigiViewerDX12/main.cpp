@@ -5872,11 +5872,8 @@ void ShowResourceView()
                     case RuntimeTypes::ViewableResource::Type::Buffer:
                     {
                         // Read back the data
-                        std::vector<unsigned char> bytes(res.m_size[0]);
                         unsigned char* data = nullptr;
                         res.m_resourceReadback->Map(0, nullptr, reinterpret_cast<void**>(&data));
-                        memcpy(bytes.data(), data, res.m_size[0]);
-                        res.m_resourceReadback->Unmap(0, nullptr);
 
                         // Gather the view info
                         struct ViewInfo
@@ -5983,7 +5980,7 @@ void ShowResourceView()
                                 SaveAsHex(outPath, bytes.data(), (int)bytes.size());
 
                             // Show it
-                            ShowTypedBuffer(bytes.data(), viewInfo.format, viewInfo.formatCount, viewInfo.count, viewInfo.showAsHex);
+                            ShowTypedBuffer(data, viewInfo.format, viewInfo.formatCount, viewInfo.count, viewInfo.showAsHex);
                         }
                         // Structured buffer
                         else
@@ -6009,9 +6006,11 @@ void ShowResourceView()
                                 SaveAsHex(outPath, bytes.data(), (int)bytes.size());
 
                             // Show it
-                            ShowStructuredBuffer(renderGraph, bytes.data(), structDesc, viewInfo.count, viewInfo.showAsHex, viewInfo.showStructuredBuffersVertically);
+                            ShowStructuredBuffer(renderGraph, data, structDesc, viewInfo.count, viewInfo.showAsHex, viewInfo.showStructuredBuffersVertically);
                         }
                         break;
+
+						res.m_resourceReadback->Unmap(0, nullptr);
                     }
                 }
             }
