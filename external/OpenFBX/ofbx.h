@@ -538,7 +538,7 @@ struct GeometryPartition {
 
 struct GeometryData {
 	virtual ~GeometryData() {}
-	
+
 	virtual Vec3Attributes getPositions() const = 0;
 	virtual Vec3Attributes getNormals() const = 0;
 	virtual Vec2Attributes getUVs(int index = 0) const = 0;
@@ -783,7 +783,7 @@ inline u32 triangulate(const GeometryData& geom, const GeometryPartition::Polygo
 		tri_indices[5] = polygon.from_vertex + 3;
 		return 6;
 	}
-	
+
 	for (int tri = 0; tri < polygon.vertex_count - 2; ++tri) {
 		tri_indices[tri * 3 + 0] = polygon.from_vertex;
 		tri_indices[tri * 3 + 1] = polygon.from_vertex + 1 + tri;

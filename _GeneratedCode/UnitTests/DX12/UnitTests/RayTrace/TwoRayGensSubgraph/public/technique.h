@@ -6,7 +6,7 @@
 #include "DX12Utils/logfn.h"
 #include "DX12Utils/dxutils.h"
 
-namespace TwoRayGens
+namespace TwoRayGensSubgraph
 {
     // Compile time technique settings. Feel free to modify these.
     static const int c_numSRVDescriptors = 256;  // If 0, no heap will be created. One heap shared by all contexts of this technique.
@@ -32,12 +32,12 @@ namespace TwoRayGens
     {
         static const char* GetTechniqueName()
         {
-            return "TwoRayGens";
+            return "TwoRayGensSubgraph";
         }
 
         static const wchar_t* GetTechniqueNameW()
         {
-            return L"TwoRayGens";
+            return L"TwoRayGensSubgraph";
         }
 
         // This is the input to the technique that you are expected to fill out

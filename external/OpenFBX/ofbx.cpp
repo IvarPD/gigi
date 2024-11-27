@@ -782,7 +782,7 @@ static OptionalError<Element*> readElement(Cursor* cursor, u32 version, Allocato
 static bool isEndLine(const Cursor& cursor)
 {
 	return (*cursor.current == '\n')
-    	|| (*cursor.current == '\r' && cursor.current + 1 < cursor.end && *(cursor.current + 1) != '\n');
+	|| (*cursor.current == '\r' && cursor.current + 1 < cursor.end && *(cursor.current + 1) != '\n');
 }
 
 
@@ -1163,7 +1163,7 @@ struct GeometryDataImpl : GeometryData {
 	Vec4AttributesImpl colors;
 	Vec2AttributesImpl uvs[Geometry::s_uvs_max];
 	std::vector<GeometryPartitionImpl> partitions;
-	
+
 	std::vector<int> materials;
 
 	template <typename T, typename S>
@@ -1182,8 +1182,8 @@ struct GeometryDataImpl : GeometryData {
 	Vec4Attributes getColors() const override { return patchAttributes<Vec4Attributes>(colors); }
 	Vec3Attributes getTangents() const override { return patchAttributes<Vec3Attributes>(tangents); }
 	int getPartitionCount() const override { return (int)partitions.size(); }
-	
-	GeometryPartition getPartition(int index) const override { 
+
+	GeometryPartition getPartition(int index) const override {
 		if (index >= partitions.size()) return {nullptr, 0, 0, 0};
 		return {
 			partitions[index].polygons.data(),
@@ -1276,7 +1276,7 @@ struct GeometryDataImpl : GeometryData {
 					int triangles = num_polygon_vertices - 2;
 					partition.triangles_count += triangles;
 					if (triangles > partition.max_polygon_triangles) partition.max_polygon_triangles = triangles;
-					
+
 					indices[i] = -indices[i] - 1;
 
 					polygon_start = i + 1;
@@ -2901,7 +2901,7 @@ static bool parseMemory(const Property& property, T* out, int max_size_bytes) {
 		case 'D':
 		case 'F':
 		case 'I':
-			return parseMemoryLinked(property, out, max_size_bytes); 
+			return parseMemoryLinked(property, out, max_size_bytes);
 		default: return false;
 	}
 	if (count * elem_size != max_size_bytes) return false;
@@ -2992,7 +2992,7 @@ template <typename T> static bool parseArray(const Property& property, std::vect
 		case 'D':
 		case 'F':
 		case 'I':
-			return parseBinaryArrayLinked(property, out); 
+			return parseBinaryArrayLinked(property, out);
 		default: return false;
 	}
 	u32 count = property.getCount();
@@ -4031,7 +4031,7 @@ bool Scene::finalize() {
 		}
 
 		object->depth = 0;
-		
+
 		Object* parent = object->parent;
 		while (parent) {
 			if (parent == object) {

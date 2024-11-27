@@ -1,6 +1,6 @@
 {
     "$schema": "gigischema.json",
-    "name": "TwoRayGens",
+    "name": "TwoRayGensSubgraphA",
     "version": "0.99b",
     "variables": [
         {
@@ -70,56 +70,6 @@
             "fileName": "TwoRayGens1.hlsl",
             "type": "RTClosestHit",
             "entryPoint": "ClosestHit1",
-            "copyFile": false
-        },
-        {
-            "name": "TwoRayGens2",
-            "fileName": "TwoRayGens2.hlsl",
-            "type": "RTRayGen",
-            "entryPoint": "RayGen2",
-            "resources": [
-                {
-                    "name": "g_texture",
-                    "type": "Texture",
-                    "access": "UAV",
-                    "buffer": {
-                        "PODAsStructuredBuffer": false
-                    }
-                },
-                {
-                    "name": "g_scene",
-                    "type": "Buffer",
-                    "access": "RTScene",
-                    "buffer": {
-                        "PODAsStructuredBuffer": false
-                    }
-                },
-                {
-                    "name": "g_blueChannel",
-                    "type": "Texture",
-                    "access": "SRV"
-                }
-            ]
-        },
-        {
-            "name": "TwoRayGensMiss2A",
-            "fileName": "TwoRayGens2.hlsl",
-            "type": "RTMiss",
-            "entryPoint": "Miss2A",
-            "copyFile": false
-        },
-        {
-            "name": "TwoRayGensMiss2B",
-            "fileName": "TwoRayGens2.hlsl",
-            "type": "RTMiss",
-            "entryPoint": "Miss2B",
-            "copyFile": false
-        },
-        {
-            "name": "TwoRayGensClosestHit2",
-            "fileName": "TwoRayGens2.hlsl",
-            "type": "RTClosestHit",
-            "entryPoint": "ClosestHit2",
             "copyFile": false
         }
     ],
@@ -195,7 +145,7 @@
                     125.0,
                     -14.0
                 ],
-                "visibility": "Exported",
+                "visibility": "Imported",
                 "format": {
                     "format": "RGBA8_Unorm_sRGB"
                 },
@@ -252,56 +202,6 @@
                 },
                 "rayPayloadSize": 12
             }
-        },
-        {
-            "actionRayShader": {
-                "name": "DoRT2",
-                "editorPos": [
-                    394.0,
-                    -1.0
-                ],
-                "linkProperties": [
-                    {},
-                    {},
-                    {}
-                ],
-                "connections": [
-                    {
-                        "srcPin": "g_texture",
-                        "dstNode": "DoRT1",
-                        "dstPin": "g_texture"
-                    },
-                    {
-                        "srcPin": "g_scene",
-                        "dstNode": "DoRT1",
-                        "dstPin": "g_scene"
-                    },
-                    {
-                        "srcPin": "g_blueChannel",
-                        "dstNode": "BlueChannel",
-                        "dstPin": "resource"
-                    }
-                ],
-                "shader": {
-                    "name": "TwoRayGens2"
-                },
-                "dispatchSize": {
-                    "node": {
-                        "name": "Texture"
-                    }
-                },
-                "rayPayloadSize": 12
-            }
-        },
-        {
-            "resourceTexture": {
-                "name": "BlueChannel",
-                "editorPos": [
-                    250.0,
-                    82.0
-                ],
-                "visibility": "Imported"
-            }
         }
     ],
     "hitGroups": [
@@ -309,12 +209,6 @@
             "name": "HitGroup1",
             "closestHit": {
                 "name": "TwoRayGensClosestHit1"
-            }
-        },
-        {
-            "name": "HitGroup2",
-            "closestHit": {
-                "name": "TwoRayGensClosestHit2"
             }
         }
     ],

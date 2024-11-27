@@ -1070,6 +1070,10 @@ bool LoadGGFile(const char* fileName, bool preserveState)
     g_startTime = context->Time;
     g_techniqueFrameIndex = 0;
 
+    OutputDebugStringA("Loaded GG File: ");
+    OutputDebugStringA(fileName);
+    OutputDebugStringA("\n");
+
     return true;
 }
 

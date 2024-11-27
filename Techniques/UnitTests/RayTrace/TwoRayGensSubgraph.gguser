@@ -6,7 +6,7 @@
         "CameraPos_varName": "cameraPos"
     },
     "snapshot": {
-        "resourceViewNodeIndex": 3,
+        "resourceViewNodeIndex": 4,
         "resourceViewResourceIndex": 4,
         "importedResources": [
             {
@@ -17,7 +17,6 @@
             },
             {
                 "nodeName": "Scene",
-                "resetEveryFrame": false,
                 "isATexture": false,
                 "buffer": {
                     "fileName": "SimpleRT_VertexBufferSimple.csv",

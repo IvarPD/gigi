@@ -1,7 +1,7 @@
 // TwoRayGens technique
 
 
-struct Struct__TwoRayGens2CB
+struct Struct__B_TwoRayGens2CB
 {
     float3 cameraPos;
     float _padding0;
@@ -13,7 +13,7 @@ struct Struct__TwoRayGens2CB
 RWTexture2D<float4> g_texture : register(u0);
 RaytracingAccelerationStructure g_scene : register(t0);
 Texture2D<float4> g_blueChannel : register(t1);
-ConstantBuffer<Struct__TwoRayGens2CB> _TwoRayGens2CB : register(b0);
+ConstantBuffer<Struct__B_TwoRayGens2CB> _B_TwoRayGens2CB : register(b0);
 
 #line 2
 
@@ -34,11 +34,11 @@ void RayGen2()
 	float2 screenPos = (float2(px)+0.5f) / dimensions * 2.0 - 1.0;
 	screenPos.y = -screenPos.y;
 
-	float4 world = mul(float4(screenPos, _TwoRayGens2CB.depthNearPlane, 1), _TwoRayGens2CB.clipToWorld);
+	float4 world = mul(float4(screenPos, _B_TwoRayGens2CB.depthNearPlane, 1), _B_TwoRayGens2CB.clipToWorld);
 	world.xyz /= world.w;
 
 	RayDesc ray;
-	ray.Origin = _TwoRayGens2CB.cameraPos;
+	ray.Origin = _B_TwoRayGens2CB.cameraPos;
 	ray.Direction = normalize(world.xyz - ray.Origin);
 	ray.TMin = 0;
 	ray.TMax = 1000.0f;
