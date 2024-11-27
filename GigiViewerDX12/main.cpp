@@ -5872,6 +5872,8 @@ void ShowResourceView()
                     case RuntimeTypes::ViewableResource::Type::Buffer:
                     {
                         // Read back the data
+                        const int bufferSize = res.m_size[0];
+
                         unsigned char* data = nullptr;
                         res.m_resourceReadback->Map(0, nullptr, reinterpret_cast<void**>(&data));
 
@@ -5971,13 +5973,13 @@ void ShowResourceView()
                             ImGui::SameLine();
                             nfdchar_t* outPath = nullptr;
                             if (ImGui::Button("Save as .csv") && NFD_SaveDialog("csv", "", &outPath) == NFD_OKAY)
-                                SaveAsCSV(outPath, bytes.data(), viewInfo.format, viewInfo.formatCount, viewInfo.count);
+                                SaveAsCSV(outPath, data, viewInfo.format, viewInfo.formatCount, viewInfo.count);
                             ImGui::SameLine();
                             if (ImGui::Button("Save as .bin") && NFD_SaveDialog("bin", "", &outPath) == NFD_OKAY)
-                                SaveAsBin(outPath, bytes.data(), (int)bytes.size());
+                                SaveAsBin(outPath, data, bufferSize);
                             ImGui::SameLine();
                             if (ImGui::Button("Save as .hex") && NFD_SaveDialog("hex", "", &outPath) == NFD_OKAY)
-                                SaveAsHex(outPath, bytes.data(), (int)bytes.size());
+                                SaveAsHex(outPath, data, bufferSize);
 
                             // Show it
                             ShowTypedBuffer(data, viewInfo.format, viewInfo.formatCount, viewInfo.count, viewInfo.showAsHex);
@@ -5997,13 +5999,13 @@ void ShowResourceView()
                             ImGui::SameLine();
                             nfdchar_t* outPath = nullptr;
                             if (ImGui::Button("Save as .csv") && NFD_SaveDialog("csv", "", &outPath) == NFD_OKAY)
-                                SaveAsCSV(outPath, bytes.data(), structDesc, viewInfo.count);
+                                SaveAsCSV(outPath, data, structDesc, viewInfo.count);
                             ImGui::SameLine();
                             if (ImGui::Button("Save as .bin") && NFD_SaveDialog("bin", "", &outPath) == NFD_OKAY)
-                                SaveAsBin(outPath, bytes.data(), (int)bytes.size());
+                                SaveAsBin(outPath, data, bufferSize);
                             ImGui::SameLine();
                             if (ImGui::Button("Save as .hex") && NFD_SaveDialog("hex", "", &outPath) == NFD_OKAY)
-                                SaveAsHex(outPath, bytes.data(), (int)bytes.size());
+                                SaveAsHex(outPath, data, bufferSize);
 
                             // Show it
                             ShowStructuredBuffer(renderGraph, data, structDesc, viewInfo.count, viewInfo.showAsHex, viewInfo.showStructuredBuffersVertically);
