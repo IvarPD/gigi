@@ -83,12 +83,23 @@ FBXCache::FBXData& FBXCache::Get(FileCache& fileCache, const char* fileName_)
 			const ofbx::Mesh* mesh = fbxScene->getMesh(meshIndex);
 			const int materialCount = mesh->getMaterialCount();
 
-			for (int matIndex = 0; matIndex < materialCount; ++matIndex)
+			// Special case were FBX was exported without any materials.
+			if (materialCount == 0)
 			{
 				auto& importMesh = importMeshes.emplace_back();
 				importMesh.fbxMesh = mesh;
-				importMesh.materialID = matIndex;
-				importMesh.submeshIndex = matIndex;
+				importMesh.materialID = 0;
+				importMesh.submeshIndex = 0;
+			}
+			else
+			{
+				for (int matIndex = 0; matIndex < materialCount; ++matIndex)
+				{
+					auto& importMesh = importMeshes.emplace_back();
+					importMesh.fbxMesh = mesh;
+					importMesh.materialID = matIndex;
+					importMesh.submeshIndex = matIndex;
+				}
 			}
 		}
 	}
