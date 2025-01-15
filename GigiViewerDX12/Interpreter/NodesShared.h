@@ -76,6 +76,7 @@ inline DXGI_FORMAT TextureFormatToDXGI_FORMAT(TextureFormat textureFormat)
 		case TextureFormat::RG8_Unorm: return DXGI_FORMAT_R8G8_UNORM;
 		case TextureFormat::RGBA8_Unorm: return DXGI_FORMAT_R8G8B8A8_UNORM;
 		case TextureFormat::RGBA8_Unorm_sRGB: return DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		case TextureFormat::BGRA8_Unorm: return DXGI_FORMAT_B8G8R8A8_UNORM;
 		case TextureFormat::R8_Snorm: return DXGI_FORMAT_R8_SNORM;
 		case TextureFormat::RG8_Snorm: return DXGI_FORMAT_R8G8_SNORM;
 		case TextureFormat::RGBA8_Snorm: return DXGI_FORMAT_R8G8B8A8_SNORM;

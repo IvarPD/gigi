@@ -11,6 +11,7 @@ ENUM_BEGIN(TextureFormat, "")
     ENUM_ITEM(RG8_Unorm, "RG 8 bit unorm")
     ENUM_ITEM(RGBA8_Unorm, "RGBA 8 bit unorm")
     ENUM_ITEM(RGBA8_Unorm_sRGB, "RGBA 8 bit unorm, sRGB")
+    ENUM_ITEM(BGRA8_Unorm, "BGRA 8 bit unorm")
 
     ENUM_ITEM(R8_Snorm, "R 8 bit snorm")
     ENUM_ITEM(RG8_Snorm, "RG 8 bit snorm")
