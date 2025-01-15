@@ -187,25 +187,58 @@ static IDxcBlob* CompileShaderToByteCode_Private(
     IDxcBlob* code = nullptr;
     result->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&code), nullptr);
 
-    /*
     // Save the PDBs.
     if (debugShaders)
     {
         IDxcBlob* pPDB = nullptr;
         IDxcBlobUtf16* pPDBName = nullptr;
-        result->GetOutput(DXC_OUT_PDB, IID_PPV_ARGS(&pPDB), &pPDBName);
+        hr = result->GetOutput(DXC_OUT_PDB, IID_PPV_ARGS(&pPDB), &pPDBName);
+        if (SUCCEEDED(hr))
         {
-            std::wstring fullPDBFileName = std::wstring(L"./ShaderPDBs/") + pPDBName->GetStringPointer();
+            const std::filesystem::path directoryPath = "./ShaderPDBs";
+            std::filesystem::path fullPDBFileName = directoryPath / std::filesystem::path(std::filesystem::path(fileName).stem().string() + "_bin" + ".pdb");
+
+            if (!std::filesystem::exists(directoryPath))
+            {
+                std::filesystem::create_directories(directoryPath);
+            }
+
             FILE* fp = NULL;
-            _wfopen_s(&fp, fullPDBFileName.c_str(), L"wb");
-            fwrite(pPDB->GetBufferPointer(), pPDB->GetBufferSize(), 1, fp);
-            fclose(fp);
+            if (_wfopen_s(&fp, fullPDBFileName.c_str(), L"wb") == 0)
+            {
+				void* bufferPointer = pPDB->GetBufferPointer();
+				size_t bufferSize = pPDB->GetBufferSize();
+
+				fwrite(bufferPointer, bufferSize, 1, fp);
+				fclose(fp);
+            }
         }
 
         pPDBName->Release();
         pPDB->Release();
     }
-    */
+
+    // Save Shader Binaries
+    if (debugShaders)
+    {
+		const std::filesystem::path directoryPath = "./ShaderBinaries";
+		std::filesystem::path fullBinaryFileName = directoryPath / std::filesystem::path(std::filesystem::path(fileName).stem().string() + "_bin" + ".cso");
+
+		if (!std::filesystem::exists(directoryPath))
+		{
+			std::filesystem::create_directories(directoryPath);
+		}
+
+		FILE* fp = NULL;
+		if (_wfopen_s(&fp, fullBinaryFileName.c_str(), L"wb") == 0)
+		{
+			void* bufferPointer = code->GetBufferPointer();
+			size_t bufferSize = code->GetBufferSize();
+
+			fwrite(bufferPointer, bufferSize, 1, fp);
+			fclose(fp);
+		}
+    }
 
     library->Release();
     compiler->Release();
