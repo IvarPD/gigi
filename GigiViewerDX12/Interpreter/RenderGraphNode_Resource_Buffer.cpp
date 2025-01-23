@@ -489,11 +489,11 @@ static std::vector<char> LoadStructuredBufferPly(const GigiInterpreterPreviewWin
 	return ret;
 }
 
-static std::vector<char> LoadStructuredBuffer(const GigiInterpreterPreviewWindowDX12::ImportedResourceDesc& desc, const RenderGraph &renderGraph, const std::vector<FlattenedVertex>& flattenedVertices)
+static std::vector<char> LoadStructuredBuffer(const GigiInterpreterPreviewWindowDX12::ImportedResourceDesc& desc, const RenderGraph &renderGraph, const std::vector<FlattenedVertex>& flattenedVertices, const std::vector<RuntimeTypes::RenderGraphNode_Resource_Buffer::MaterialInfo>& materialInfo)
 {
 	// Allocate space to hold the results
 	const Struct& structDesc = renderGraph.structs[desc.buffer.structIndex];
-	size_t vertexCount = flattenedVertices.size();
+	size_t vertexCount = desc.buffer.IsMaterialBuffer ? materialInfo.size() : flattenedVertices.size();
 	size_t destVertexSize = structDesc.sizeInBytes;
 	std::vector<char> ret(destVertexSize * vertexCount, 0);
 
@@ -646,6 +646,102 @@ static std::vector<char> LoadStructuredBuffer(const GigiInterpreterPreviewWindow
 					while (index < min(1, typeInfo.componentCount))
 					{
 						AssignWithCast(&ret[vertexIndex * destVertexSize + offset], index, typeInfo.componentType, &flattenedVertices[vertexIndex].shapeIndex);
+						index++;
+					}
+
+					while (index < typeInfo.componentCount)
+					{
+						SetToZero(&ret[vertexIndex * destVertexSize + offset], index, typeInfo.componentType);
+						index++;
+					}
+				}
+				break;
+			}
+			case StructFieldSemantic::Material_BaseColor:
+			{
+				for (size_t vertexIndex = 0; vertexIndex < vertexCount; ++vertexIndex)
+				{
+					if (materialInfo.size() <= vertexIndex)
+					{
+						break;
+					}
+
+					int index = 0;
+					while (index < min(3, typeInfo.componentCount))
+					{
+						AssignWithCast(&ret[vertexIndex * destVertexSize + offset], index, typeInfo.componentType, materialInfo[vertexIndex].baseColor.data());
+						index++;
+					}
+
+					while (index < typeInfo.componentCount)
+					{
+						SetToZero(&ret[vertexIndex * destVertexSize + offset], index, typeInfo.componentType);
+						index++;
+					}
+				}
+				break;
+			}
+			case StructFieldSemantic::Material_Emissive:
+			{
+				for (size_t vertexIndex = 0; vertexIndex < vertexCount; ++vertexIndex)
+				{
+					if (materialInfo.size() <= vertexIndex)
+					{
+						break;
+					}
+
+					int index = 0;
+					while (index < min(3, typeInfo.componentCount))
+					{
+						AssignWithCast(&ret[vertexIndex * destVertexSize + offset], index, typeInfo.componentType, materialInfo[vertexIndex].emissive.data());
+						index++;
+					}
+
+					while (index < typeInfo.componentCount)
+					{
+						SetToZero(&ret[vertexIndex * destVertexSize + offset], index, typeInfo.componentType);
+						index++;
+					}
+				}
+				break;
+			}
+			case StructFieldSemantic::Material_Roughness:
+			{
+				for (size_t vertexIndex = 0; vertexIndex < vertexCount; ++vertexIndex)
+				{
+					if (materialInfo.size() <= vertexIndex)
+					{
+						break;
+					}
+
+					int index = 0;
+					while (index < min(1, typeInfo.componentCount))
+					{
+						AssignWithCast(&ret[vertexIndex * destVertexSize + offset], index, typeInfo.componentType, &materialInfo[vertexIndex].roughness);
+						index++;
+					}
+
+					while (index < typeInfo.componentCount)
+					{
+						SetToZero(&ret[vertexIndex * destVertexSize + offset], index, typeInfo.componentType);
+						index++;
+					}
+				}
+				break;
+			}
+			case StructFieldSemantic::Material_Metallic:
+			{
+				for (size_t vertexIndex = 0; vertexIndex < vertexCount; ++vertexIndex)
+				{
+					if (materialInfo.size() <= vertexIndex)
+					{
+						break;
+					}
+
+					int index = 0;
+					while (index < min(1, typeInfo.componentCount))
+					{
+						AssignWithCast(&ret[vertexIndex * destVertexSize + offset], index, typeInfo.componentType, &materialInfo[vertexIndex].metallic);
 						index++;
 					}
 
@@ -970,7 +1066,12 @@ bool GigiInterpreterPreviewWindowDX12::OnNodeActionImported(const RenderGraphNod
 
 							bool used = (materialsUsed.count(materialIndex) > 0);
 
-							runtimeData.materials.push_back(RuntimeTypes::RenderGraphNode_Resource_Buffer::MaterialInfo(material.name, used));
+							auto& newMaterial = runtimeData.materials.emplace_back();
+							newMaterial.name = material.name;
+							newMaterial.used = used;
+							newMaterial.baseColor[0] = material.diffuse[0];
+							newMaterial.baseColor[1] = material.diffuse[1];
+							newMaterial.baseColor[2] = material.diffuse[2];
 						}
 
 						// Load a typed buffer
@@ -978,7 +1079,7 @@ bool GigiInterpreterPreviewWindowDX12::OnNodeActionImported(const RenderGraphNod
 							rawBytes = LoadTypedBuffer(desc, objData.flattenedVertices);
 						// Load a structured buffer
 						else
-							rawBytes = LoadStructuredBuffer(desc, m_renderGraph, objData.flattenedVertices);
+							rawBytes = LoadStructuredBuffer(desc, m_renderGraph, objData.flattenedVertices, runtimeData.materials);
 					}
 				}
 				else if (p.extension() == ".fbx")
@@ -998,7 +1099,7 @@ bool GigiInterpreterPreviewWindowDX12::OnNodeActionImported(const RenderGraphNod
 							rawBytes = LoadTypedBuffer(desc, fbxData.flattenedVertices);
 						// Load a structured buffer
 						else
-							rawBytes = LoadStructuredBuffer(desc, m_renderGraph, fbxData.flattenedVertices);
+							rawBytes = LoadStructuredBuffer(desc, m_renderGraph, fbxData.flattenedVertices, runtimeData.materials);
 					}
 				}
 				else if (p.extension() == ".csv")
