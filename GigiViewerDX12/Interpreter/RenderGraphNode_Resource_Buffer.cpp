@@ -1059,19 +1059,23 @@ bool GigiInterpreterPreviewWindowDX12::OnNodeActionImported(const RenderGraphNod
 							materialsUsed.insert(vertex.materialID);
 
 						// store which materials are referenced by the mesh, and which are actually used.
-						runtimeData.materials.clear();
 						for (int materialIndex = 0; materialIndex < (int)objData.materials.size(); ++materialIndex)
 						{
 							const tinyobj::material_t& material = objData.materials[materialIndex];
 
 							bool used = (materialsUsed.count(materialIndex) > 0);
+							bool alreadyExists = materialIndex < runtimeData.materials.size();
 
-							auto& newMaterial = runtimeData.materials.emplace_back();
+							auto& newMaterial = alreadyExists ? runtimeData.materials[materialIndex] : runtimeData.materials.emplace_back();
 							newMaterial.name = material.name;
 							newMaterial.used = used;
-							newMaterial.baseColor[0] = material.diffuse[0];
-							newMaterial.baseColor[1] = material.diffuse[1];
-							newMaterial.baseColor[2] = material.diffuse[2];
+
+							if (!alreadyExists)
+							{
+								newMaterial.baseColor[0] = material.diffuse[0];
+								newMaterial.baseColor[1] = material.diffuse[1];
+								newMaterial.baseColor[2] = material.diffuse[2];
+							}
 						}
 
 						// Load a typed buffer

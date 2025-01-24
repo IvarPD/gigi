@@ -3263,6 +3263,8 @@ void ShowImportedResources()
                                 g_materialInfoName = importedResourceInfo.originalName;
                                 g_materialsBufferDesc = importedResourceInfo.desc;
                             }
+
+                            ImGui::SameLine();
                         }
                     }
                     else
@@ -3410,11 +3412,25 @@ void ShowImGuiWindows()
             {
                 auto& material = runtimeData.materials.at(g_materialPopupIndex);
 
+                ImGui::Text("%s", material.name.c_str());
+
                 bool updated = false;
 
                 updated |= ImGui::ColorEdit3("Base Color", material.baseColor.data());
-                updated |= ImGui::ColorEdit3("Emissive Color", material.emissive.data());
-                updated |= ImGui::DragFloat("Emissive Multiplier", &material.emissiveMultiplier);
+                if (ImGui::ColorEdit3("Emissive Color", material.emissiveColor.data()))
+                {
+					material.emissive[0] = material.emissiveColor[0] * material.emissiveMultiplier;
+					material.emissive[1] = material.emissiveColor[1] * material.emissiveMultiplier;
+					material.emissive[2] = material.emissiveColor[2] * material.emissiveMultiplier;
+                    updated = true;
+                }
+                if (ImGui::DragFloat("Emissive Multiplier", &material.emissiveMultiplier))
+                {
+					material.emissive[0] = material.emissiveColor[0] * material.emissiveMultiplier;
+					material.emissive[1] = material.emissiveColor[1] * material.emissiveMultiplier;
+					material.emissive[2] = material.emissiveColor[2] * material.emissiveMultiplier;
+                    updated = true;
+                }
                 updated |= ImGui::DragFloat("Roughness", &material.roughness);
                 updated |= ImGui::DragFloat("Metallic", &material.metallic);
 
