@@ -1098,6 +1098,37 @@ bool GigiInterpreterPreviewWindowDX12::OnNodeActionImported(const RenderGraphNod
 
 					if (fbxData.valid)
 					{
+						// find out which materials are used.
+						std::unordered_set<int> materialsUsed;
+						for (const auto& vertex : fbxData.flattenedVertices)
+							materialsUsed.insert(vertex.materialID);
+
+						// store which materials are referenced by the mesh, and which are actually used.
+						for (int materialIndex = 0; materialIndex < (int)fbxData.materials.size(); ++materialIndex)
+						{
+							const FBXCache::FBXData::Material& material = fbxData.materials[materialIndex];
+
+							bool used = (materialsUsed.count(materialIndex) > 0);
+							bool alreadyExists = materialIndex < runtimeData.materials.size();
+
+							auto& newMaterial = alreadyExists ? runtimeData.materials[materialIndex] : runtimeData.materials.emplace_back();
+							newMaterial.name = material.name;
+							newMaterial.used = used;
+
+							if (!alreadyExists)
+							{
+								newMaterial.baseColor[0] = material.diffuseColor[0];
+								newMaterial.baseColor[1] = material.diffuseColor[1];
+								newMaterial.baseColor[2] = material.diffuseColor[2];
+
+								newMaterial.emissiveColor[0] = material.emissiveColor[0];
+								newMaterial.emissiveColor[1] = material.emissiveColor[1];
+								newMaterial.emissiveColor[2] = material.emissiveColor[2];
+
+								newMaterial.emissiveMultiplier = material.emissiveMultiplier;
+							}
+						}
+
 						// Load a typed buffer
 						if (desc.buffer.type != DataFieldType::Count)
 							rawBytes = LoadTypedBuffer(desc, fbxData.flattenedVertices);
