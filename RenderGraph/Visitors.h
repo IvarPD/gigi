@@ -1994,6 +1994,12 @@ struct SanitizeVisitor
         return true;
     }
 
+    bool Visit(StructReference& data, const std::string& path)
+    {
+        Sanitize(data.name);
+        return true;
+    }
+
     bool Visit(RTHitGroup& data, const std::string& path)
     {
         Sanitize(data.name, data.originalName);
@@ -2881,7 +2887,7 @@ struct ShaderDataVisitor
                 Assert(variableIndex >= 0, "Could not find variable %s.\nIn %s\n", variableName.c_str(), path.c_str());
                 const Variable& variable = renderGraph.variables[variableIndex];
 
-                // automatically pad constant buffers
+                // automatically pad constant buffers per this documentation:
                 // https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-packing-rules
                 size_t variableSize = DataFieldTypeToSize(variable.type);
                 if (byteCount > 0 && byteCount + variableSize > 16)
