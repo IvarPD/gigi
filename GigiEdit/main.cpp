@@ -1115,16 +1115,6 @@ struct Example :
         int nodeCount = ed::GetSelectedNodes(selectedNodes.data(), static_cast<int>(selectedNodes.size()));
         selectedNodes.resize(nodeCount);
 
-        ImGui::GetWindowDrawList()->AddRectFilled(
-            ImGui::GetCursorScreenPos(),
-            ImGui::GetCursorScreenPos() + ImVec2(paneWidth, ImGui::GetTextLineHeight()),
-            ImColor(ImGui::GetStyle().Colors[ImGuiCol_HeaderActive]), ImGui::GetTextLineHeight() * 0.25f);
-        ImGui::Spacing(); ImGui::SameLine();
-        char buffer[256];
-        sprintf_s(buffer, "%i Nodes", (int)g_renderGraph.nodes.size());
-        ImGui::TextUnformatted(buffer);
-        ImGui::Indent();
-
         // Make a sorted list of nodes
         struct NodeInfo
         {
@@ -1136,8 +1126,11 @@ struct Example :
             int nodeId_ = 0;
             for (const RenderGraphNode& node : g_renderGraph.nodes)
             {
-                nodeId_++;
-                sortedNodes.push_back({ GetNodeName(node), nodeId_ });
+				nodeId_++;
+                if (node._index != RenderGraphNode::c_index_reroute)
+                {
+					sortedNodes.push_back({ GetNodeName(node), nodeId_ });
+                }
             }
 
             std::sort(sortedNodes.begin(), sortedNodes.end(),
@@ -1147,6 +1140,16 @@ struct Example :
                 }
             );
         }
+
+		ImGui::GetWindowDrawList()->AddRectFilled(
+			ImGui::GetCursorScreenPos(),
+			ImGui::GetCursorScreenPos() + ImVec2(paneWidth, ImGui::GetTextLineHeight()),
+			ImColor(ImGui::GetStyle().Colors[ImGuiCol_HeaderActive]), ImGui::GetTextLineHeight() * 0.25f);
+		ImGui::Spacing(); ImGui::SameLine();
+		char buffer[256];
+		sprintf_s(buffer, "%i Nodes", (int)sortedNodes.size());
+		ImGui::TextUnformatted(buffer);
+		ImGui::Indent();
 
         // show the list of nodes
         for (const NodeInfo& nodeInfo : sortedNodes)
