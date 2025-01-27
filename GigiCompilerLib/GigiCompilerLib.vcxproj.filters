@@ -386,6 +386,9 @@
     <ClInclude Include="Backends\DX12\templates\Module\DX12Utils\Camera.h">
       <Filter>Backends\DX12\templates\Module\DX12Utils</Filter>
     </ClInclude>
+    <ClInclude Include="..\Nodes\reroute.h">
+      <Filter>Nodes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="schemas">
@@ -554,6 +557,9 @@
     </None>
     <None Include="Backends\DX12\templates\Module\ggconfig.json">
       <Filter>Backends\DX12\templates\Module</Filter>
+    </None>
+    <None Include="Backends\DX12\nodes\node_reroute.inl">
+      <Filter>Backends\DX12\nodes</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -25,7 +25,7 @@ struct BlueprintNodeBuilder
 {
     BlueprintNodeBuilder(ImTextureID texture = nullptr, int textureWidth = 0, int textureHeight = 0);
 
-    void Begin(NodeId id, bool isResourceNode, bool isDisabled);
+    void Begin(NodeId id, ImColor color, bool isResourceNode, bool isDisabled);
     void End();
 
     void Header(const ImVec4& color = ImVec4(1, 1, 1, 1));
