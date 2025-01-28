@@ -95,6 +95,7 @@ inline DXGI_FORMAT TextureFormatToDXGI_FORMAT(TextureFormat textureFormat)
 		case TextureFormat::RG32_Float: return DXGI_FORMAT_R32G32_FLOAT;
 		case TextureFormat::RGBA32_Float: return DXGI_FORMAT_R32G32B32A32_FLOAT;
 		case TextureFormat::R32_Uint: return DXGI_FORMAT_R32_UINT;
+		case TextureFormat::RG32_Uint: return DXGI_FORMAT_R32G32_UINT;
 		case TextureFormat::RGBA32_Uint: return DXGI_FORMAT_R32G32B32A32_UINT;
 		case TextureFormat::R11G11B10_Float: return DXGI_FORMAT_R11G11B10_FLOAT;
 		case TextureFormat::D32_Float: return DXGI_FORMAT_D32_FLOAT;

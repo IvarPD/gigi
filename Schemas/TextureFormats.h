@@ -39,6 +39,7 @@ ENUM_BEGIN(TextureFormat, "")
 
     // 32 bit uint
     ENUM_ITEM(R32_Uint, "R 32 bit uint")
+	ENUM_ITEM(RG32_Uint, "RG 32 bit uint")
     ENUM_ITEM(RGBA32_Uint, "RGBA 32 bit uint")
 
     // Other
