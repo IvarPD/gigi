@@ -9,6 +9,7 @@
 #include <string>
 #include <unordered_map>
 #include <sstream>
+#include <fstream>
 #include <filesystem>
 #include "Nodes/nodes.h"
 #include "GigiAssert.h"
@@ -312,6 +313,23 @@ inline bool LoadFile(const std::string& fileName, std::vector<unsigned char>& da
     fread(data.data(), data.size(), 1, file);
 
     fclose(file);
+    return true;
+}
+
+inline bool LoadFileAsString(const std::string& fileName, std::string& data)
+{
+	std::ifstream inStream{};
+	inStream.open(fileName);
+
+    if (!inStream)
+    {
+        return false;
+    }
+
+	std::stringstream buffer;
+	buffer << inStream.rdbuf();
+    data = buffer.str();
+
     return true;
 }
 

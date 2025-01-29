@@ -1587,6 +1587,84 @@ struct BackendDX12 : public BackendBase
     }
 };
 
+void InlineShaderIncludesInternal(const std::filesystem::path& outFolder, std::string& shaderFileString, std::string& result, std::unordered_set<std::string>& resolvedFiles)
+{
+	size_t offset = 0;
+
+    struct IncludedFileInfo
+    {
+        std::string filename;
+        size_t directiveOffset;
+        size_t directiveCount;
+    };
+
+	std::vector<IncludedFileInfo> includedFiles;
+
+	offset = shaderFileString.find("#include", offset);
+
+	while (offset != std::string::npos)
+	{
+		size_t open = shaderFileString.find_first_of("\"", offset);
+		size_t close = shaderFileString.find_first_of("\"", open + 1);
+
+		auto& info = includedFiles.emplace_back();
+        info.filename = shaderFileString.substr(open + 1, close - open - 1);
+        info.directiveOffset = offset;
+        info.directiveCount = close - offset + 1;
+
+		offset = shaderFileString.find("#include", close);
+	}
+
+    std::vector<std::string> loadedIncludes;
+    size_t additionalOffset = 0;
+
+	for (const auto& includedFile : includedFiles)
+	{
+        if (resolvedFiles.find(includedFile.filename) != resolvedFiles.end())
+        {
+            shaderFileString.erase(additionalOffset + includedFile.directiveOffset, includedFile.directiveCount);
+            additionalOffset -= includedFile.directiveCount;
+            continue;
+        }
+
+		std::string srcFileName = (outFolder / includedFile.filename).string();
+		std::string includedShaderFile;
+		if (!LoadFileAsString(srcFileName, includedShaderFile))
+		{
+			continue;
+		}
+
+		InlineShaderIncludesInternal(outFolder, includedShaderFile, result, resolvedFiles);
+		resolvedFiles.insert(includedFile.filename);
+
+		shaderFileString.replace(additionalOffset + includedFile.directiveOffset, includedFile.directiveCount, includedShaderFile);
+        additionalOffset += includedShaderFile.size() - includedFile.directiveCount;
+	}
+
+    // Remove pragma once directives
+    offset = shaderFileString.rfind("#pragma once");
+    while (offset != std::string::npos)
+    {
+        shaderFileString.erase(offset, 12);
+        offset = shaderFileString.rfind("#pragma once");
+    }
+}
+
+void InlineShaderIncludes(std::vector<unsigned char>& shaderFile, const char* outFolder)
+{
+    std::string result;
+    std::unordered_set<std::string> resolvedFiles;
+
+    std::filesystem::path copyOutFolder = std::filesystem::path(outFolder) / "shaders";
+
+    std::string shaderFileString = (char*)shaderFile.data();
+    InlineShaderIncludesInternal(copyOutFolder, shaderFileString, result, resolvedFiles);
+
+    shaderFile.resize(shaderFileString.size());
+    memcpy(shaderFile.data(), shaderFileString.data(), shaderFileString.size());
+    shaderFile.push_back(0);
+}
+
 void CopyShaderFileDX12(const Shader& shader, const std::unordered_map<std::string, std::ostringstream>& stringReplacementMap, const char* outFolder, const RenderGraph& renderGraph)
 {
     std::unordered_map<std::string, std::ostringstream> shaderSpecificStringReplacementMap;
@@ -1637,6 +1715,8 @@ void CopyShaderFileDX12(const Shader& shader, const std::unordered_map<std::stri
     }
     shaderFile.push_back(0);
 
+    InlineShaderIncludes(shaderFile, outFolder);
+
     // write out enums
     {
         for (const auto& e : renderGraph.enums)
@@ -1651,7 +1731,7 @@ void CopyShaderFileDX12(const Shader& shader, const std::unordered_map<std::stri
                 ;
 
             int itemIndex = -1;
-            for (const auto& item : e.items)
+            for (const auto& item : e.items) 
             {
                 itemIndex++;
                 shaderSpecificStringReplacementMap["/*$(ShaderResources)*/"] <<

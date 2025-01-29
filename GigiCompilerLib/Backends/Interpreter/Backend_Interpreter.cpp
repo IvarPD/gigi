@@ -35,6 +35,15 @@ void RunBackend_Interpreter(GigiBuildFlavor buildFlavor, RenderGraph& renderGrap
     std::unordered_map<std::string, std::string> files;
     std::unordered_map<std::string, std::ostringstream> stringReplacementMap = MakeFiles<BackendInterpreter>(files, renderGraph);
 
+    // HACK: We need to make sure the assert tokens are kept in the file copies
+	for (const Shader& shader : renderGraph.shaders)
+    {
+        for (const auto& token : shader.tokenReplacements)
+        {
+            stringReplacementMap[token.name] = std::ostringstream(token.value);
+        }
+    }
+
     // copy any file copies that should happen (assets, and shader file headers)
     for (const FileCopy& fileCopy : renderGraph.fileCopies)
     {
@@ -93,6 +102,15 @@ void RunBackend_Interpreter(GigiBuildFlavor buildFlavor, RenderGraph& renderGrap
             WriteFileIfDifferent(fullFileName, fileContents);
         }
     }
+
+    // HACK: Remove the assert tokens again.
+	for (const Shader& shader : renderGraph.shaders)
+	{
+		for (const auto& token : shader.tokenReplacements)
+		{
+            stringReplacementMap.erase(token.name);
+		}
+	}
 
     // Copy the shader files
     for (const Shader& shader : renderGraph.shaders)
