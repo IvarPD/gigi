@@ -40,7 +40,7 @@ void RunBackend_Interpreter(GigiBuildFlavor buildFlavor, RenderGraph& renderGrap
     {
         for (const auto& token : shader.tokenReplacements)
         {
-            stringReplacementMap[token.name] = std::ostringstream(token.value);
+            stringReplacementMap[token.name] = std::ostringstream(token.name);
         }
     }
 
