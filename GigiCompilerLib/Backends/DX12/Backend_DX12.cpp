@@ -1587,7 +1587,29 @@ struct BackendDX12 : public BackendBase
     }
 };
 
-void InlineShaderIncludesInternal(const std::filesystem::path& outFolder, std::string& shaderFileString, std::string& result, std::unordered_set<std::string>& resolvedFiles)
+size_t GetLineNumberFromOffset(const std::string& str, size_t offset)
+{
+    size_t lineNum = 0;
+    for (size_t i = 0; i < offset; i++)
+    {
+        if (str[i] == '\n')
+        {
+            lineNum++;
+        }
+    }
+
+    return lineNum;
+}
+
+std::string ReplaceCharacter(const std::string& src, const char oldCharacter, const char newCharacter)
+{
+	std::string temp = src;
+	std::replace(temp.begin(), temp.end(), oldCharacter, newCharacter);
+
+	return temp;
+}
+
+void InlineShaderIncludesInternal(const std::filesystem::path& outFolder, const std::string& shaderFilename, std::string& shaderFileString, std::string& result, std::unordered_set<std::string>& resolvedFiles)
 {
 	size_t offset = 0;
 
@@ -1596,6 +1618,7 @@ void InlineShaderIncludesInternal(const std::filesystem::path& outFolder, std::s
         std::string filename;
         size_t directiveOffset;
         size_t directiveCount;
+        size_t directiveLineNumber;
     };
 
 	std::vector<IncludedFileInfo> includedFiles;
@@ -1611,6 +1634,7 @@ void InlineShaderIncludesInternal(const std::filesystem::path& outFolder, std::s
         info.filename = shaderFileString.substr(open + 1, close - open - 1);
         info.directiveOffset = offset;
         info.directiveCount = close - offset + 1;
+        info.directiveLineNumber = GetLineNumberFromOffset(shaderFileString, offset);
 
 		offset = shaderFileString.find("#include", close);
 	}
@@ -1634,8 +1658,11 @@ void InlineShaderIncludesInternal(const std::filesystem::path& outFolder, std::s
 			continue;
 		}
 
-		InlineShaderIncludesInternal(outFolder, includedShaderFile, result, resolvedFiles);
+		InlineShaderIncludesInternal(outFolder, srcFileName, includedShaderFile, result, resolvedFiles);
 		resolvedFiles.insert(includedFile.filename);
+
+        includedShaderFile.insert(0, "#line 1 \"" + ReplaceCharacter(srcFileName, '\\', '/') + "\"\n");
+        includedShaderFile.insert(includedShaderFile.size(), "\n#line " + std::to_string(includedFile.directiveLineNumber + 1) + " \"" + ReplaceCharacter(shaderFilename, '\\', '/') + "\"");
 
 		shaderFileString.replace(additionalOffset + includedFile.directiveOffset, includedFile.directiveCount, includedShaderFile);
         additionalOffset += includedShaderFile.size() - includedFile.directiveCount;
@@ -1650,7 +1677,7 @@ void InlineShaderIncludesInternal(const std::filesystem::path& outFolder, std::s
     }
 }
 
-void InlineShaderIncludes(std::vector<unsigned char>& shaderFile, const char* outFolder)
+void InlineShaderIncludes(std::vector<unsigned char>& shaderFile, const char* outFolder, const std::string& shaderFilename)
 {
     std::string result;
     std::unordered_set<std::string> resolvedFiles;
@@ -1658,7 +1685,7 @@ void InlineShaderIncludes(std::vector<unsigned char>& shaderFile, const char* ou
     std::filesystem::path copyOutFolder = std::filesystem::path(outFolder) / "shaders";
 
     std::string shaderFileString = (char*)shaderFile.data();
-    InlineShaderIncludesInternal(copyOutFolder, shaderFileString, result, resolvedFiles);
+    InlineShaderIncludesInternal(copyOutFolder, shaderFilename, shaderFileString, result, resolvedFiles);
 
     shaderFile.resize(shaderFileString.size());
     memcpy(shaderFile.data(), shaderFileString.data(), shaderFileString.size());
@@ -1715,7 +1742,7 @@ void CopyShaderFileDX12(const Shader& shader, const std::unordered_map<std::stri
     }
     shaderFile.push_back(0);
 
-    InlineShaderIncludes(shaderFile, outFolder);
+    InlineShaderIncludes(shaderFile, outFolder, srcFileName);
 
     // write out enums
     {
