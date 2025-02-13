@@ -53,6 +53,7 @@
 
 #include "ImageReadback.h"
 #include "ImageSave.h"
+#include <comdef.h>
 // clang-format on
 
 #include <thread>
@@ -1502,16 +1503,24 @@ void HandleMainMenu()
                     i++;
                 }
 
-                PIXGpuCaptureNextFrames(fileName, captureFrames);
-
                 char currentDirectory[4096];
                 GetCurrentDirectoryA(4096, currentDirectory);
-                Log(LogLevel::Info, "Pix capture saved to %s", std::filesystem::weakly_canonical(std::filesystem::path(currentDirectory) / fileName).string().c_str());
 
-                if (openCapture)
-                    waitingToOpenFileName = std::filesystem::weakly_canonical(std::filesystem::path(currentDirectory) / fileName).string();
+                HRESULT hr = PIXGpuCaptureNextFrames(fileName, captureFrames);
+                if (FAILED(hr))
+                {
+                    _com_error err(hr);
+                    Log(LogLevel::Error, "Could not save pix capture to %s:\n%s", std::filesystem::weakly_canonical(std::filesystem::path(currentDirectory) / fileName).string().c_str(), FromWideString(err.ErrorMessage()).c_str());
+                }
                 else
-                    waitingToOpenFileName = "";
+                {
+                    Log(LogLevel::Info, "Pix capture saved to %s", std::filesystem::weakly_canonical(std::filesystem::path(currentDirectory) / fileName).string().c_str());
+
+                    if (openCapture)
+                        waitingToOpenFileName = std::filesystem::weakly_canonical(std::filesystem::path(currentDirectory) / fileName).string();
+                    else
+                        waitingToOpenFileName = "";
+                }
             }
 
 			if (g_renderDocEnabled && ImGui::Button("RenderDoc Capture"))
@@ -1789,7 +1798,8 @@ void ShowImageThumbnail(ID3D12Resource* resource, DXGI_FORMAT format, const int 
     desc.m_format = format;
 
     D3D12_GPU_DESCRIPTOR_HANDLE descTable;
-    if (g_interpreter.GetDescriptorTableCache_ImGui().GetDescriptorTable(g_pd3dDevice, g_interpreter.GetSRVHeapAllocationTracker_ImGui(), &desc, 1, descTable, HEAP_DEBUG_TEXT()))
+    std::string error;
+    if (g_interpreter.GetDescriptorTableCache_ImGui().GetDescriptorTable(g_pd3dDevice, g_interpreter.GetSRVHeapAllocationTracker_ImGui(), &desc, 1, descTable, error, HEAP_DEBUG_TEXT()))
     {
         DXGI_FORMAT_Info formatInfo = Get_DXGI_FORMAT_Info(format);
         uint64_t shaderFlags = GetImGuiImageShaderFlags(format, false);
@@ -2129,8 +2139,9 @@ void SynchronizeSystemVariables()
                 jitter[0] /= resolution[0];
                 jitter[1] /= resolution[1];
 
-                jitteredProjMtx.r[2].m128_f32[0] += jitter[0];
-                jitteredProjMtx.r[2].m128_f32[1] += jitter[1];
+                // Times 2 because the projection matrix maps on screen points to be between -1 and +1, not 0 to 1, so the pixels are twice as big for jitter purposes.
+                jitteredProjMtx.r[2].m128_f32[0] += jitter[0] * 2.0f;
+                jitteredProjMtx.r[2].m128_f32[1] += jitter[1] * 2.0f;
             }
         }
 
@@ -5568,7 +5579,8 @@ void ShowResourceView()
 						D3D12_GPU_DESCRIPTOR_HANDLE descTable;
 						ImVec2 imagePosition = ImVec2{ 0.0f, 0.0f };
 						ImVec2 imageSize = ImVec2{ 0.0f, 0.0f };
-						if (g_interpreter.GetDescriptorTableCache_ImGui().GetDescriptorTable(g_pd3dDevice, g_interpreter.GetSRVHeapAllocationTracker_ImGui(), &desc, 1, descTable, HEAP_DEBUG_TEXT()))
+                        std::string error;
+						if (g_interpreter.GetDescriptorTableCache_ImGui().GetDescriptorTable(g_pd3dDevice, g_interpreter.GetSRVHeapAllocationTracker_ImGui(), &desc, 1, descTable, error, HEAP_DEBUG_TEXT()))
 						{
 							uint64_t shaderFlags = GetImGuiImageShaderFlags(res.m_format, true);
 							ImGui::GetCurrentWindow()->DrawList->AddCallback(ImDrawCallback_SetShaderFlags, (void*)(shaderFlags));

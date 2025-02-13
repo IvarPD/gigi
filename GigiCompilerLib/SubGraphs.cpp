@@ -650,7 +650,7 @@ static void HandleSubgraphOutputPin(RenderGraph& parentGraph, RenderGraph& child
             if (GetNodeIsResourceNode(node))
                 continue;
 
-            const auto pins = FrontEndNodesNoCaching::GetPinInfo(node);
+            const auto pins = FrontEndNodesNoCaching::GetPinInfo(childGraph, node);
             for (const auto& pin : pins)
             {
                 if (*pin.dstNode != ref.node || *pin.dstPin != ref.pin)
@@ -741,7 +741,7 @@ static void HandleSubgraphOutputPins(RenderGraph& parentGraph, RenderGraph& chil
             if (GetNodeIsResourceNode(node))
                 continue;
 
-            auto pins = FrontEndNodesNoCaching::GetPinInfo(node);
+            auto pins = FrontEndNodesNoCaching::GetPinInfo(parentGraph, node);
             for (auto& pin : pins)
             {
                 if (*pin.dstNode != subGraphNode.name || *pin.dstPin != resourceName)
@@ -773,7 +773,7 @@ static void HandleSubgraphOutputPins(RenderGraph& parentGraph, RenderGraph& chil
             if (GetNodeIsResourceNode(node))
                 continue;
 
-            auto pins = FrontEndNodesNoCaching::GetPinInfo(node);
+            auto pins = FrontEndNodesNoCaching::GetPinInfo(parentGraph, node);
             for (auto& pin : pins)
             {
                 if (*pin.dstNode != subGraphNode.name || *pin.dstPin != resourceName)

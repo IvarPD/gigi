@@ -20,6 +20,8 @@
 
 #include "shlobj_core.h"
 
+bool g_logOpen = false;
+
 bool ShowErrorMessage(const char* fmt, ...)
 {
 	char buffer[4096];
@@ -173,7 +175,8 @@ void Browser::GetSearchResults(bool refreshingResults)
 
 	if (!m_lastSearch_Text.empty())
 	{
-		query << (firstWhereClause ? " where " : " and ") << "(Details_Title like ? or Details_Description like ? or Details_Author like ?)";
+		query << (firstWhereClause ? " where " : " and ") << "(Details_Title like ? or Details_Description like ? or Details_Author like ? or SummaryHash like ?)";
+		parameterStrings.push_back(std::string("%") + m_lastSearch_Text + std::string("%"));
 		parameterStrings.push_back(std::string("%") + m_lastSearch_Text + std::string("%"));
 		parameterStrings.push_back(std::string("%") + m_lastSearch_Text + std::string("%"));
 		parameterStrings.push_back(std::string("%") + m_lastSearch_Text + std::string("%"));
@@ -512,8 +515,12 @@ void* Browser::GetDescriptorTableForImage(const char* path, int& width, int& hei
 	desc.m_format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE descTable;
-	if (!m_descriptorTableCache_imgui.GetDescriptorTable(m_device, m_SRVHeapAllocationTracker_imgui, &desc, 1, descTable, HEAP_DEBUG_TEXT()))
+	std::string error;
+	if (!m_descriptorTableCache_imgui.GetDescriptorTable(m_device, m_SRVHeapAllocationTracker_imgui, &desc, 1, descTable, error, HEAP_DEBUG_TEXT()))
+	{
+		ShowErrorMessage("Could not get descriptor table: %s", error.c_str());
 		return nullptr;
+	}
 
 	return (void*)descTable.ptr;
 }
@@ -547,6 +554,10 @@ void Browser::ShowBrowserWindow()
 		ImGui::SameLine();
 		if (ImGui::Button("Open Viewer"))
 			RunCommandLine(false, "GigiViewerDX12.exe");
+
+		ImGui::SameLine();
+		if (ImGui::Button(g_logOpen ? "Hide Log" : "View Log"))
+			g_logOpen = !g_logOpen;
 
 		// Text
 		{
@@ -608,6 +619,7 @@ void Browser::ShowBrowserWindow()
 				comboWidth = max(comboWidth, ImGui::CalcTextSize(label).x + ImGui::GetStyle().FramePadding.x * 2.0f);
 			}
 
+			ImGui::SameLine();
 			ImGui::SetNextItemWidth(comboWidth + ImGui::GetTextLineHeightWithSpacing() + 10);
 			if (ImGui::BeginCombo("Downloaded", EnumToString(m_search_Downloaded), ImGuiComboFlags_None))
 			{
@@ -924,6 +936,9 @@ void Browser::ShowBrowserWindow()
 
 void Browser::ShowLogWindow()
 {
+	if (!g_logOpen)
+		return;
+
 	if (!ImGui::Begin("Log"))
 	{
 		ImGui::End();
