@@ -1211,6 +1211,11 @@ struct Example :
             int nodeId_ = 0;
             for (const RenderGraphNode& node : g_renderGraph.nodes)
             {
+                if (node._index == RenderGraphNode::c_index_reroute)
+                {
+                    continue;
+                }
+
                 std::string nodeName = GetNodeName(node);
                 if (!searchQuery.empty() && StringFindForceLowercase(nodeName, searchQuery) == std::string::npos)
                 {
