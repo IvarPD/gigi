@@ -1211,6 +1211,8 @@ struct Example :
             int nodeId_ = 0;
             for (const RenderGraphNode& node : g_renderGraph.nodes)
             {
+				nodeId_++;
+
                 if (node._index == RenderGraphNode::c_index_reroute)
                 {
                     continue;
@@ -1222,7 +1224,6 @@ struct Example :
                     continue;
                 }
 
-                nodeId_++;
                 sortedNodes.push_back({ nodeName, nodeId_ });
             }
 
