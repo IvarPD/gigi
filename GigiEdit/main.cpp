@@ -2310,8 +2310,13 @@ struct Example :
                 isTransient = node.resourceTexture.transient;
             }
 
+
             result.color = isTransient ? GetColorFromArray(g_renderGraph.styleSettings.resourceNodeColor, 128) : GetColorFromArray(g_renderGraph.styleSettings.nonTransientResourceNodeColor, 128);
         }
+		else if (node._index == RenderGraphNode::c_index_reroute)
+		{
+            result.color = ImColor(255, 255, 255, 200);
+		}
 
         return result;
     }

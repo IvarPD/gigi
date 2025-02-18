@@ -228,19 +228,6 @@ inline bool GetNodeIsResourceNode(const RenderGraphNode& node)
     return ret;
 }
 
-inline ImColor GetNodeColor(const RenderGraphNode& node)
-{
-    if (node._index == RenderGraphNode::c_index_reroute)
-    {
-        return ImColor(255, 255, 255, 200);
-    }
-
-	// colors like Frostbite FrameGraph
-    // slide 17 https://www.slideshare.net/DICEStudio/framegraph-extensible-rendering-architecture-in-frostbite
-    bool isResourceNode = GetNodeIsResourceNode(node);
-    return isResourceNode ? ImColor(128, 128, 255, 128) : ImColor(255, 128, 64, 128);
-}
-
 inline std::array<float, 2> GetNodeEditorPos(const RenderGraphNode& node)
 {
     std::array<float, 2> ret;
